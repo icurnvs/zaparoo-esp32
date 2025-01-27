@@ -28,7 +28,6 @@ export class EspUtils{
     private static onClose() {
         LogUtils.addLogLine('Connection to ZAP ESP closed');
         console.log('Connection to ZAP ESP closed');
-        setTimeout(()=> this.initWebSocket(), 2000);
     }
     
     private static onMessage(event: MessageEvent) {
@@ -56,6 +55,12 @@ export class EspUtils{
             case "writeResults":
                 console.log("wr: ", msgData.data)    
                 ZapUtils.handleWriteResults(msgData.data.isSuccess, msgData.data.isCardDetected);
+                break;
+            case "closeWS":
+                console.log("wr: ", msgData)    
+                this.websocket.onclose = null;
+                this.websocket.close();
+                setTimeout(()=> this.initWebSocket(), 2000);
                 break;
         }
     }
@@ -110,5 +115,12 @@ export class EspUtils{
         LogUtils.notify("Updated Wifi, ESP will now attempt to reconnect");
     }
 
+    static resetESP32(){
+        const payload = {
+            cmd: "doReset"
+        };
+        this.websocket.send(JSON.stringify(payload));
+        LogUtils.notify("Requested ESP Reset");
+    }
     
 }

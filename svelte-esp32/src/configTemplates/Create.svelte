@@ -3,7 +3,6 @@
   import { ZapUtils } from '../backend/ZapUtils';
   import { CommonUtils } from '../backend/CommonUtils';
   import { EspUtils } from "../backend/EspUtils";
-    import { LogUtils } from '../backend/LogUtils';
   let zapSysList: zapSystems = ZapUtils.getBlankSystems();
   let zapSvsList: sourceZapSvsList = ZapUtils.getActiveSourceList();
   let zapSrchRes: zapSearchResults = ZapUtils.getBlankSearchResults();
@@ -56,6 +55,7 @@
   }
 
   function getSystems(){
+    zapSysList = ZapUtils.getBlankSystems();
     ZapUtils.initConnection(selectedSource);
     searchQry = "";
   }
@@ -132,19 +132,21 @@
     
 </script>
 <div class="text-center mb-3">
-  <h2>Search for a title</h2>
+  <h2>Create TAG mode</h2>
+  <h3>Select Source & Search for a title</h3>
 </div>
 <form on:submit={handleSubmit} class="row g-3">
   <div class="col-12">
     <div class="input-group mb-3">
-      <div class="col-4">
+      <div class="col-5">
         <label for="selSystem">Select Source</label><select class="form-select" id="selSystem" bind:value={selectedSource} on:change={getSystems}>
           {#each zapSvsList.sources as { value, name}}
             <option value={value}>{name}</option>
           {/each}
         </select>
       </div>
-      {#if selectedSource != ""}
+      <div class="col-1"></div>
+      {#if zapSysList.systems && selectedSource != ""}
       <div class="col-2">
         <button type="button" class="btn btn-primary mt-4" on:click={doDBIndex}>Update Zap DB</button>
       </div>
@@ -203,8 +205,7 @@
     <div class="container">
       <div class="row">
         <div class="col text-center">  
-          <button type="button" class="btn btn-primary mt-4" on:click="{diagWriteOpen}">Write To Card</button>
-        
+          <button type="button" class="btn btn-primary mt-4" on:click="{diagWriteOpen}">Write To Card</button>        
           <button type="button" class="btn btn-primary mt-4" on:click="{doTestLaunch}">Test Launch</button>
         </div>
       </div>

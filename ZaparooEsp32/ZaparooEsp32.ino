@@ -319,6 +319,16 @@ void setWebConfigData(JsonDocument& cfgData) {
   ESP.restart();
 }
 
+void handleResetRequest(){
+  JsonDocument cmdData;
+  cmdData["msgType"] = "closeWS";
+  cmdClients(cmdData);
+  delay(1000);
+  ws.closeAll();
+  ws.cleanupClients();
+  ESP.restart();
+}
+
 void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
   AwsFrameInfo* info = static_cast<AwsFrameInfo*>(arg);
   if (!info->final || info->index != 0 || info->len != len || info->opcode != WS_TEXT) {
@@ -377,6 +387,8 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     WiFi.disconnect(); 
     WiFi.mode(WIFI_STA);
     notifyClients("Updated ssid", "log");
+  } else if (command == "doReset") {
+      handleResetRequest();
   } else {
     notifyClients("Unknown Command", "log");
   }

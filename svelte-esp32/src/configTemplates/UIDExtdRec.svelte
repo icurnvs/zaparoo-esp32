@@ -2,6 +2,7 @@
     import { UIDUtils } from "../backend/UIDUtils";
     import type { UIDExtdRecord } from "../types/ConfigData";
     import { CommonUtils } from "../backend/CommonUtils";
+    import { onDestroy, onMount } from 'svelte';
     let uidRecord: UIDExtdRecord = UIDUtils.getBlank();
     UIDUtils.UIDRecord().subscribe(value=> uidRecord = value);
     const handleSubmit = (event: Event) => {
@@ -12,7 +13,12 @@
         updRec.removeAudio = CommonUtils.validateAudioPath(uidRecord.removeAudio);
         UIDUtils.updateUIDRecord(updRec);
     }
-    
+    onMount(()=>{
+      UIDUtils.setUIDMode(true);
+    })
+    onDestroy(() => {
+      UIDUtils.setUIDMode(false);
+    });
 </script>
 <div class="text-center mt-2">
     <h4>Scan an item to update audio controls</h4>

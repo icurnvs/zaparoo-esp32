@@ -67,7 +67,7 @@ export class ZapUtils{
         newZapSvsList.sources = [];
         if(this.currConfig.steamOS_enabled){
             newZapSvs = this.getBlankSourceZapSvs();
-            newZapSvs.name = "SteamOS";
+            newZapSvs.name = "Steam";
             newZapSvs.value = "steam";
             newZapSvsList.sources.push(newZapSvs);
         }
@@ -105,13 +105,13 @@ export class ZapUtils{
     }
 
     private static connOnOpen(){
-        LogUtils.notify("Connected to Zaparoo");
+        LogUtils.notify(`Connected to Zaparoo on ${this.currZapSvs}`);
         this.bZapSvsConnected = true;
         this.generateIndexedSystemsList();
     }
 
     private static connOnClose(){
-        LogUtils.notify("Disconnected From Zaparoo");
+        //LogUtils.notify(`Disconnected From Zaparoo on ${this.currZapSvs}`);
         //console.log("zap conn closed");
         this.bZapSvsConnected = false;
     }
@@ -274,13 +274,15 @@ export class ZapUtils{
         tmpWRS.state = 0;        
         this.writeResultState.set(tmpWRS);
         let newCMD = this.getBlankESPMsg();
+        if(!aLaunchP){aLaunchP = ""};
+        if(!aRemoveP){aRemoveP = ""};
         newCMD.cmd = "write_Tag_Launch_Game";
         newCMD.data = {
             launchData: launchPath.trim(),
             audioLaunchPath: aLaunchP,
             audioRemovePath: aRemoveP
         }
-        //console.log("write cmd: ", newCMD);
+        console.log("write cmd: ", newCMD);
         EspUtils.sendMessage(newCMD);
     }
 

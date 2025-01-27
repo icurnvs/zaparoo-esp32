@@ -44,7 +44,7 @@
       <div class="input-group-text">
         <div class="form-check form-switch col-2">
           <input class="form-check-input" type="checkbox" role="switch" id="enableSteam" bind:checked={config.steamOS_enabled}/>
-          <label class="form-check-label visually-hidden" for="enableSteam">Enable SteamOS</label>
+          <label class="form-check-label visually-hidden" for="enableSteam">Enable Steam</label>
         </div>
       </div>
       <div class="form-floating">
