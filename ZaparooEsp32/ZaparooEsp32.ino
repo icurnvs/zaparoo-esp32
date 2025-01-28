@@ -80,7 +80,7 @@ void setPref_Float(const String& key, float valFloat) {
 }
 
 void notifyClients(const String& txtMsgToSend, const String& msgType) {
-  if(!SERIAL_ONLY) Serial.println(txtMsgToSend);
+  if(!SERIAL_ONLY && txtMsgToSend != "KeepAlive") Serial.println(txtMsgToSend);
   if (isWebLog) {
     JsonDocument msgJson;
     msgJson["msgType"] = "notify";
@@ -389,6 +389,8 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     notifyClients("Updated ssid", "log");
   } else if (command == "doReset") {
       handleResetRequest();
+  } else if (command == "ping") {
+      notifyClients("KeepAlive", "log");
   } else {
     notifyClients("Unknown Command", "log");
   }

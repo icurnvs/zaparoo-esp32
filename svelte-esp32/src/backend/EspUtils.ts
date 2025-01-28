@@ -10,6 +10,7 @@ export class EspUtils{
     private static connected: Writable<boolean> = writable();
     private static intialLoad = false;
     private static updating = false;
+    private static timerID: any = 0;
     
     static initWebSocket() {
         console.log('Trying to open a WebSocket connection to ZAP ESP…');
@@ -19,15 +20,36 @@ export class EspUtils{
         this.websocket.onmessage = this.onMessage.bind(this);
     }
 
+    static closeWebSocket(){
+        this.websocket.send("{'cmd': 'closeWS'}");
+        this.websocket.close();
+    }
+
+    private static keepAlive() { 
+        let timeout = 10000;
+        if (this.websocket.readyState == this.websocket.OPEN) {  
+            this.websocket.send("{'cmd': 'ping'}");  
+        }  
+        this.timerID = setTimeout(this.keepAlive.bind(this), timeout);  
+    }
+    
+    private static cancelKeepAlive() {  
+        if (this.timerID) {  
+            clearTimeout(this.timerID);  
+        }  
+    }
+
     private static onOpen() {
         LogUtils.addLogLine('Connection to ZAP ESP opened');
         console.log('Connection to ZAP ESP opened');
-        this.websocket.send("{'cmd': 'get_Current_Config'}");			
+        this.websocket.send("{'cmd': 'get_Current_Config'}");
+        this.keepAlive();			
     }
     
     private static onClose() {
         LogUtils.addLogLine('Connection to ZAP ESP closed');
         console.log('Connection to ZAP ESP closed');
+        this.cancelKeepAlive();
     }
     
     private static onMessage(event: MessageEvent) {

@@ -10,7 +10,7 @@
     import WifiConfig from './configTemplates/WifiConfig.svelte';
     import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
     import logo from './lib/assets/ZapEspLogo.webp';
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import type { NavBarLink } from './types/NavBarLink';
     let reloadKey = {};
     let activeLink: string = ""; 
@@ -54,6 +54,9 @@
     onMount(()=>{
       //EspUtils.initWebSocket();
       setActiveLink(window.location.hash.slice(1));
+    });
+    onDestroy(()=>{
+      EspUtils.closeWebSocket();
     });
     function doResetReload() {
       EspUtils.resetESP32();
