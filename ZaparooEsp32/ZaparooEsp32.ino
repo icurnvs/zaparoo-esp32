@@ -51,11 +51,12 @@ int timeoutLoop = 0;
 bool isConnected = false;
 bool isWebLog = false;
 bool softReset = false;
-bool mister_enabled = true;
-bool steamOS_enabled = false;
-bool UID_ScanMode_enabled = false;
-String SteamIP = "steamOS.local";
-String ZapIP = "mister.local";
+bool misterEnabled = true;
+bool steamEnabled = false;
+bool uidScanMode= false;
+bool serialOnly = false;
+String steamIp = "steamOS.local";
+String zapIp = "mister.local";
 String lastSerialCommand = "";
 
 //Prototypes
@@ -80,7 +81,7 @@ void setPref_Float(const String& key, float valFloat) {
 }
 
 void notifyClients(const String& txtMsgToSend, const String& msgType) {
-  if(!SERIAL_ONLY && txtMsgToSend != "KeepAlive") Serial.println(txtMsgToSend);
+  if(!serialOnly && txtMsgToSend != "KeepAlive") Serial.println(txtMsgToSend);
   if (isWebLog) {
     JsonDocument msgJson;
     msgJson["msgType"] = "notify";
@@ -111,7 +112,7 @@ void onEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType 
       break;
     case WS_EVT_DISCONNECT:
       Serial.printf("WebSocket client #%u disconnected\n", client->id());
-      setPref_Bool("En_NFC_Wr", false);
+      setPref_Bool("enNfcWr", false);
       isWebLog = false;
       break;
     case WS_EVT_DATA:
@@ -138,6 +139,8 @@ void startApMode() {
   server.begin();
   initWebSocket();
   MDNS.begin("zapesp");
+  Serial.flush();
+  delay(100);
 }
 
 void connectWifi() {
@@ -146,13 +149,13 @@ void connectWifi() {
   }
   WiFi.disconnect();
   MDNS.end();
-  String ssid = preferences.getString("Wifi_SSID", "");
+  String ssid = preferences.getString("wifiSSID", "");
   if(ssid.isEmpty()){
     startApMode();
     return;
   }
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, preferences.getString("Wifi_PASS", ""));
+  WiFi.begin(ssid, preferences.getString("wifiPass", ""));
   int retries = 30;
   while (WiFi.status() != WL_CONNECTED && retries--) {
     feedback.wifiLedOn();
@@ -219,7 +222,7 @@ void getUIDExtdRec(){
 bool send(String& gamePath) {
   String message;
   bool sent = false;
-  if (SERIAL_ONLY) {
+  if (serialOnly) {
     lastSerialCommand = "SCAN\ttext=" + gamePath;
     if(!feedback.resetOnRemove){
       lastSerialCommand = lastSerialCommand + "\tremovable=no";
@@ -230,7 +233,7 @@ bool send(String& gamePath) {
     sent = true;
   } else {
     String newURL = ZAP_URL;
-    newURL.replace("<replace>", gamePath.startsWith("steam://") ? SteamIP : ZapIP);
+    newURL.replace("<replace>", gamePath.startsWith("steam://") ? steamIp : zapIp);
     ZapClient.url(newURL);
     notifyClients("URL: " + newURL, "log");
     int code = ZapClient.launch(gamePath);
@@ -249,7 +252,7 @@ bool send(String& gamePath) {
 bool sendUid(String& uid) {
   String message;
   bool sent = false;
-  if (SERIAL_ONLY) {
+  if (serialOnly) {
     lastSerialCommand = "SCAN\tuid=" + uid;
     if(!feedback.resetOnRemove){
       lastSerialCommand = lastSerialCommand + "\tremovable=no";
@@ -261,7 +264,7 @@ bool sendUid(String& uid) {
   } else {
     //not possible to determine if steam game from UID so always default to MiSTer if enabled
     String newURL = ZAP_URL;
-    newURL.replace("<replace>", mister_enabled ? ZapIP : SteamIP);
+    newURL.replace("<replace>", misterEnabled ? zapIp : steamIp);
     ZapClient.url(newURL);
     int code = ZapClient.launchUid(uid);
     if (code > 0) {
@@ -289,12 +292,13 @@ void getWebConfigData() {
   JsonDocument configData;
   feedback.set(configData);
   configData["msgType"] = "ConfigData";
-  configData["data"]["ZapIP"] = preferences.getString("ZapIP", "mister.local");
-  configData["data"]["mister_enabled"] = preferences.getBool("En_Mister", true);
-  configData["data"]["steamOS_enabled"] = preferences.getBool("En_SteamOS", false);
-  configData["data"]["SteamIP"] = preferences.getString("SteamIP", "steamOS.local");
+  configData["data"]["zapIp"] = preferences.getString("zapIp", "mister.local");
+  configData["data"]["misterEnabled"] = preferences.getBool("misterEnabled", true);
+  configData["data"]["steamEnabled"] = preferences.getBool("steamEnabled", false);
+  configData["data"]["serialOnly"] = preferences.getBool("serialOnly", false);
+  configData["data"]["steamIp"] = preferences.getString("steamIp", "steamOS.local");
   configData["data"]["PN532_module"] = isPN532;
-  configData["data"]["zap_ws_path"] = ZaparooLaunchApi::wsPath; 
+  configData["data"]["zapWsPath"] = ZaparooLaunchApi::wsPath; 
   cmdClients(configData);
 }
 
@@ -302,17 +306,20 @@ void setWebConfigData(JsonDocument& cfgData) {
   notifyClients("ZAP ESP Now Saving Config Data", "log");
   feedback.launchLedOff();
   feedback.update(cfgData);
-  if(cfgData["data"].containsKey("ZapIP")){
-    setPref_Str("ZapIP", cfgData["data"]["ZapIP"]);
+  if(cfgData["data"].containsKey("zapIp")){
+    setPref_Str("zapIp", cfgData["data"]["zapIp"]);
   }
-  if(cfgData["data"].containsKey("steamOS_enabled")){
-    setPref_Bool("En_SteamOS", cfgData["data"]["steamOS_enabled"]);
+  if(cfgData["data"].containsKey("steamEnabled")){
+    setPref_Bool("steamEnabled", cfgData["data"]["steamEnabled"]);
   }
-  if(cfgData["data"].containsKey("mister_enabled")){
-    setPref_Bool("En_Mister", cfgData["data"]["mister_enabled"]);
+  if(cfgData["data"].containsKey("misterEnabled")){
+    setPref_Bool("misterEnabled", cfgData["data"]["misterEnabled"]);
   }
-  if(cfgData["data"].containsKey("SteamIP")){
-    setPref_Str("SteamIP", cfgData["data"]["SteamIP"]);
+  if(cfgData["data"].containsKey("serialOnly")){
+    setPref_Bool("serialOnly", cfgData["data"]["serialOnly"]);
+  }
+  if(cfgData["data"].containsKey("steamIp")){
+    setPref_Str("steamIp", cfgData["data"]["steamIp"]);
   }
   preferences.end();
   Serial.println("Rebooting after saving");
@@ -346,8 +353,8 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
   if (command == "set_WriteMode") {
     bool enableWriteMode = root["data"];
     notifyClients(enableWriteMode ? "NFC Tag Write Mode Enabled" : "NFC Tag Write Mode Disabled", "log");
-    setPref_Bool("En_NFC_Wr", enableWriteMode);
-  } else if (command == "write_Tag_Launch_Game" && preferences.getBool("En_NFC_Wr", false)) {
+    setPref_Bool("enNfcWr", enableWriteMode);
+  } else if (command == "write_Tag_Launch_Game" && preferences.getBool("enNfcWr", false)) {
       notifyClients("NFC Tag Writing the Launch Game Command", "log");
       String launchData = root["data"]["launchData"].as<String>();
       String audioLaunchPath = root["data"]["audioLaunchPath"].as<String>();
@@ -362,7 +369,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
       String data = root["data"].as<String>();
       send(data);
   } else if (command == "closeWS") {
-      setPref_Bool("En_NFC_Wr", false);
+      setPref_Bool("enNfcWr", false);
       ws.closeAll();
       ws.cleanupClients();
   } else if (command == "getUIDExtdRec") {
@@ -371,7 +378,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
   } else if (command == "set_UIDMode") {
       bool enableUIDMode = root["data"];
       notifyClients(enableUIDMode ? "UID Scanning Mode Enabled" : "UID Scanning Mode Disabled", "alert");
-      UID_ScanMode_enabled = enableUIDMode;
+      uidScanMode= enableUIDMode;
       //get UIDExtdRec data if enabling UID mode
       if(enableUIDMode){
         getUIDExtdRec();
@@ -382,8 +389,8 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
       feedback.saveUidMapping(data);
       //saveUIDExtdRec(root["data"]);
   } else if (command == "wifi") {
-    setPref_Str("Wifi_SSID", root["data"]["ssid"].as<String>());
-    setPref_Str("Wifi_PASS", root["data"]["password"].as<String>());
+    setPref_Str("wifiSSID", root["data"]["ssid"].as<String>());
+    setPref_Str("wifiPass", root["data"]["password"].as<String>());
     WiFi.disconnect(); 
     WiFi.mode(WIFI_STA);
     notifyClients("Updated ssid", "log");
@@ -398,19 +405,19 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
 
 void handleSend(){
   bool sent = false;
-  bool playAudioFirst = SERIAL_ONLY && feedback.resetOnRemove &&!UID_ScanMode_enabled;
+  bool playAudioFirst = serialOnly && feedback.resetOnRemove && uidScanMode;
   feedback.setUidAudioMappings(token);
   if(playAudioFirst){
     feedback.successActions(token); //Play the audio before launch to support remove with simple serial
     sent = true;
   }
-  if (!token->isBlankPayload() && !UID_ScanMode_enabled) {
+  if (!token->isBlankPayload() && !uidScanMode) {
     String payload = String(token->getPayload());
     sent = send(payload);
-  } else if (token->isIdSet() && !UID_ScanMode_enabled) {
+  } else if (token->isIdSet() && !uidScanMode) {
     String id = String(token->getId());
     sent = sendUid(id);
-  }else if(token->isIdSet() && UID_ScanMode_enabled){
+  }else if(token->isIdSet() && uidScanMode){
     String id = String(token->getId());
     sendUIDtoWeb(id);
   }
@@ -421,7 +428,7 @@ void handleSend(){
 
 //Loop 20 times per read to break out and run other loop code
 bool readScanner() {
-  for (int i = 0; i < 20 && !preferences.getBool("En_NFC_Wr", false); i++) {
+  for (int i = 0; i < 20 && !preferences.getBool("enNfcWr", false); i++) {
     bool present = tokenScanner->tokenPresent();
     ZaparooToken* parsed = present ? tokenScanner->getNewToken() : NULL;
     if (present && parsed) {
@@ -443,7 +450,7 @@ bool readScanner() {
         removeAudio = token->getRemoveAudio();
       }
       feedback.cardRemovedActions(token);
-      if (feedback.resetOnRemove && !SERIAL_ONLY && token->isPayloadSet()) {
+      if (feedback.resetOnRemove && !serialOnly && token->isPayloadSet()) {
         String payloadAsString = String(token->getPayload());
         if (!payloadAsString.startsWith("steam://")) {
           ZapClient.stop();
@@ -453,7 +460,7 @@ bool readScanner() {
       inserted = false;
       tokenScanner->halt();
       return true;
-    }else if (present && inserted && SERIAL_ONLY && feedback.resetOnRemove){
+    }else if (present && inserted && serialOnly && feedback.resetOnRemove){
       Serial.println(lastSerialCommand);
       Serial.flush();
     }
@@ -486,14 +493,15 @@ void setup() {
   }
   preferences.begin("qrplay", false);
   feedback.init(&preferences);
-  setPref_Bool("En_NFC_Wr", false);
-  UID_ScanMode_enabled = false;
+  setPref_Bool("enNfcWr", false);
+  uidScanMode= false;
   
   //set globals to reduce the number of call to preference library (performance)
-  ZapIP = preferences.getString("ZapIP", "mister.local");
-  mister_enabled = preferences.getBool("En_Mister", true);
-  steamOS_enabled = preferences.getBool("En_SteamOS", false);
-  SteamIP = preferences.getString("SteamIP", "steamOS.local");
+  zapIp = preferences.getString("zapIp", "mister.local");
+  misterEnabled = preferences.getBool("misterEnabled", true);
+  steamEnabled = preferences.getBool("steamEnabled", false);
+  steamIp = preferences.getString("steamIp", "steamOS.local");
+  serialOnly = preferences.getBool("serialOnly", false);
 
   if (feedback.sdCardEnabled) {
     Serial.println("SD CARD MODE");
@@ -514,7 +522,7 @@ void setup() {
 
 void loop() {
   connectWifi();
-  if (!preferences.getBool("En_NFC_Wr", false)) {
+  if (!preferences.getBool("enNfcWr", false)) {
     readScanner();
   }
   delay(50);
