@@ -26,7 +26,7 @@ export interface ConfigData {
   audioEnabled: boolean;
   pwrLedEnabled: boolean;
   resetOnRemove: boolean;
-  ZapIP: string;
+  zapIp: string;
   i2sDoutPin: number;
   i2sBclkPin: number;
   i2sLrcPin: number;
@@ -35,10 +35,10 @@ export interface ConfigData {
   wifiLedPin: number;
   launchLedPin: number;
   pwrLedPin: number;
-  mister_enabled: boolean;
-  steamOS_enabled: boolean;
+  misterEnabled: boolean;
+  steamEnabled: boolean;
   sdCardEnabled: boolean;
-  SteamIP: string;
+  steamIp: string;
   defaultLaunchAudio: string;
   defaultInsertAudio: string;
   defaultRemoveAudio: string;
@@ -50,7 +50,8 @@ export interface ConfigData {
   buzzOnRemove: boolean;
   buzzOnError: boolean;
   PN532_module: boolean;
-  zap_ws_path: string;
+  zapWsPath: string;
+  serialOnly: boolean;
 };
 
 export interface UIDExtdRecord {

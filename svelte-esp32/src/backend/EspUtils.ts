@@ -122,7 +122,6 @@ export class EspUtils{
 
     static sendMessage(newMsg: EspMessage){
         this.websocket.send(JSON.stringify(newMsg));
-        //LogUtils.notify(`Message Sent.. CMD:${newMsg.cmd}`);
     }
 
     static updateWifi(ssid: string, password: string){

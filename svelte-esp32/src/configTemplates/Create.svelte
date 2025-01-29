@@ -43,13 +43,13 @@
 
   function settingsIsChanged(currSet: ConfigData){
     //monitors for changes to settings and reloads SourceList
-    if(currSet.SteamIP != "" || currSet.ZapIP != ""){
+    if(currSet.steamIp != "" || currSet.zapIp != ""){
       zapSvsList = ZapUtils.getActiveSourceList();
     }
-    if(currSet.steamOS_enabled || currSet.mister_enabled){
+    if(currSet.steamEnabled || currSet.misterEnabled){
       zapSvsList = ZapUtils.getActiveSourceList();
     }
-    if(!currSet.steamOS_enabled || !currSet.mister_enabled){
+    if(!currSet.steamEnabled || !currSet.misterEnabled){
       zapSvsList = ZapUtils.getActiveSourceList();
     }    
   }

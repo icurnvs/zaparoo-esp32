@@ -15,7 +15,6 @@ export class ZapUtils{
     private static currZapSvs: string = "";
     
     private static buildZapSocketURL(ip: string, path: string): string{
-        //console.log("socket path", `ws://${ip}:7497${path}`)
         return `ws://${ip}:7497${path}`;
     }
 
@@ -65,13 +64,13 @@ export class ZapUtils{
         let newZapSvs = null;
         let newZapSvsList = this.getBlankSourceZapSvsList();
         newZapSvsList.sources = [];
-        if(this.currConfig.steamOS_enabled){
+        if(this.currConfig.steamEnabled){
             newZapSvs = this.getBlankSourceZapSvs();
             newZapSvs.name = "Steam";
             newZapSvs.value = "steam";
             newZapSvsList.sources.push(newZapSvs);
         }
-        if(this.currConfig.mister_enabled){
+        if(this.currConfig.misterEnabled){
             newZapSvs = this.getBlankSourceZapSvs();
             newZapSvs.name = "MiSTer";
             newZapSvs.value = "mister";
@@ -88,10 +87,10 @@ export class ZapUtils{
         this.currZapSvs = source;
         switch(source){
             case "steam":
-                this.initConn(this.buildZapSocketURL(this.currConfig.SteamIP, this.currConfig.zap_ws_path));
+                this.initConn(this.buildZapSocketURL(this.currConfig.steamIp, this.currConfig.zapWsPath));
                 break;
             case "mister":
-                this.initConn(this.buildZapSocketURL(this.currConfig.ZapIP, this.currConfig.zap_ws_path));
+                this.initConn(this.buildZapSocketURL(this.currConfig.zapIp, this.currConfig.zapWsPath));
                 break;
         }
     }
