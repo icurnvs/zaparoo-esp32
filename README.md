@@ -5,7 +5,7 @@ The goal of this project is to launch games via the [Zaparoo Service](https://wi
 ## Features:  
 - Supports Universal launching for both MiSTer and Steam
 - Play Audio files for Card Detected, Game Launched, and Card Removed events.  
-- Play game specific Audio Files for Game Launch and Card Removed events (requires 215 or 216 RFID Tags/Cards for the extra data)  
+- Play game specific Audio Files for Game Launch and Card Removed events
 - SD Card Module support (Only Supported with PN532 Module installed) to store more audio files.
 - A Web UI to
   - configure the ESP32's LED's, Rumble Motor, & Audio Module's GPIO pins (if installed),
