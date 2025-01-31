@@ -226,8 +226,8 @@ bool send(String& gamePath) {
     lastSerialCommand = "SCAN\ttext=" + gamePath;
     if(!feedback.resetOnRemove){
       lastSerialCommand = lastSerialCommand + "\tremovable=no";
+      Serial.println(lastSerialCommand);
     }
-    Serial.println(lastSerialCommand);
     Serial.flush();
     message = "Sent game path to serial: " + gamePath;
     sent = true;
