@@ -49,6 +49,9 @@
       if(value){
         alertText = value;
         showToast();
+        if (alertText == "Settings updated, ESP will reload"){
+          setTimeout(()=> reloadKey = {}, 1000);
+        }
       }
     });
     onMount(()=>{

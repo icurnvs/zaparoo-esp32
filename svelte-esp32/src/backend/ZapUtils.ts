@@ -66,7 +66,7 @@ export class ZapUtils{
         newZapSvsList.sources = [];
         if(this.currConfig.steamEnabled){
             newZapSvs = this.getBlankSourceZapSvs();
-            newZapSvs.name = "Steam";
+            newZapSvs.name = "Zaparoo For Steam";
             newZapSvs.value = "steam";
             newZapSvsList.sources.push(newZapSvs);
         }
