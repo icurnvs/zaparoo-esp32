@@ -58,6 +58,7 @@
     zapSysList = ZapUtils.getBlankSystems();
     ZapUtils.initConnection(selectedSource);
     searchQry = "";
+    selectedGame = "";
   }
   
   const handleSubmit = (event: Event) => {
@@ -189,6 +190,12 @@
         </div>
       </div>
       {#if selectedGame.length > 0}
+        <div class="input-group mt-3">
+          <div class="col-12">
+            <label for="searchQry">Launch Path</label>
+            <input type="text" class="form-control" id="txtLauchP" disabled bind:value={selectedGame}/>
+          </div>
+        </div>
         <div class="input-group mt-3">
           <div class="col-6">
             <label for="searchQry">Launch Audio Path</label>

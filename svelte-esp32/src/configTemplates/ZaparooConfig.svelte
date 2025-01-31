@@ -23,13 +23,13 @@
     <div class="input-group">
       <div class="input-group-text">
         <div class="form-check form-switch col-2">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableMister" bind:checked={config.misterEnabled}/>
-          <label class="form-check-label visually-hidden" for="enableMister">Enable Mister</label>
+          <input class="form-check-input" type="checkbox" data-bs-toggle="tooltip" title="Enable Zaparoo" data-bs-placement="top" role="switch" id="enablezaparoo" bind:checked={config.misterEnabled}/>
+          <label class="form-check-label visually-hidden" for="enablezaparoo">Enable Zaparoo</label>
         </div>
       </div>
       <div class="form-floating">
-        <input type="text" class="form-control col-6" id="misterIp" placeholder="mister.local" bind:value={config.zapIp} disabled={!config.misterEnabled} />
-        <label for="misterIp">Mister Address</label>
+        <input type="text" class="form-control col-6" id="zaparooIp" placeholder="zaparoo.local" bind:value={config.zapIp} disabled={!config.misterEnabled} />
+        <label for="zaparooIp">Zaparoo Address</label>
       </div>
       <div class="input-group-text">
         <div class="form-check form-switch col-4">
@@ -43,13 +43,13 @@
     <div class="input-group">
       <div class="input-group-text">
         <div class="form-check form-switch col-2">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableSteam" bind:checked={config.steamEnabled}/>
-          <label class="form-check-label visually-hidden" for="enableSteam">Enable Steam</label>
+          <input class="form-check-input" type="checkbox" data-bs-toggle="tooltip" title="Enable Zaparoo for Steam" data-bs-placement="top" role="switch" id="enableSteam" bind:checked={config.steamEnabled}/>
+          <label class="form-check-label visually-hidden" for="enableSteam">Enable Zaparoo for Steam</label>
         </div>
       </div>
       <div class="form-floating">
         <input type="text" class="form-control" id="steamIp" placeholder="steam.local" bind:value={config.steamIp} disabled={!config.steamEnabled} />
-        <label for="steamIp">Steam Address</label>
+        <label for="steamIp">Zaparoo for Steam Address</label>
       </div>
     </div>
   </div>

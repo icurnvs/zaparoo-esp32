@@ -66,14 +66,14 @@ export class ZapUtils{
         newZapSvsList.sources = [];
         if(this.currConfig.steamEnabled){
             newZapSvs = this.getBlankSourceZapSvs();
-            newZapSvs.name = "Steam";
+            newZapSvs.name = "Zaparoo For Steam";
             newZapSvs.value = "steam";
             newZapSvsList.sources.push(newZapSvs);
         }
         if(this.currConfig.misterEnabled){
             newZapSvs = this.getBlankSourceZapSvs();
-            newZapSvs.name = "MiSTer";
-            newZapSvs.value = "mister";
+            newZapSvs.name = "Zaparoo";
+            newZapSvs.value = "zaparoo";
             newZapSvsList.sources.push(newZapSvs);
         }
         return newZapSvsList;
@@ -89,7 +89,7 @@ export class ZapUtils{
             case "steam":
                 this.initConn(this.buildZapSocketURL(this.currConfig.steamIp, this.currConfig.zapWsPath));
                 break;
-            case "mister":
+            case "zaparoo":
                 this.initConn(this.buildZapSocketURL(this.currConfig.zapIp, this.currConfig.zapWsPath));
                 break;
         }
@@ -122,7 +122,7 @@ export class ZapUtils{
             //return of Systems List
             if(typeof(msgData.result.systems) != "undefined"){
                 let tmpSysList: zapSystems = msgData.result;
-                this.processMiSTerSystems(tmpSysList);
+                this.processZaparooSystems(tmpSysList);
             }
             //return of search results
             if(typeof(msgData.result.results) != "undefined"){
@@ -164,9 +164,9 @@ export class ZapUtils{
         this.htmlResults.set(tmpHtmlSR);
     }
 
-    private static processMiSTerSystems(recSysList: zapSystems){
-        //only Sort & process results if MiSTer else return special values for ESP32 routing launch command
-        if(this.currZapSvs != "mister"){
+    private static processZaparooSystems(recSysList: zapSystems){
+        //only Sort & process results if Zaparoo else return special values for ESP32 routing launch command
+        if(this.currZapSvs != "zaparoo"){
             let tmpObj = this.getBlankSystem(); 
             if(this.currZapSvs == "steam"){
                 tmpObj.category = "steamOS";
@@ -192,7 +192,7 @@ export class ZapUtils{
                 }
                 return 0;
             });
-            let tmpAllObj = {category: "all", id: "*", name:"All MiSTer Systems"};
+            let tmpAllObj = {category: "all", id: "*", name:"All Systems"};
             recSysList.systems.unshift(tmpAllObj);
             this.retSystems.set(recSysList);
         }
