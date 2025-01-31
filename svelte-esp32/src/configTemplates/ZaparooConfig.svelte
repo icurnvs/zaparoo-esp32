@@ -7,7 +7,7 @@
       event.preventDefault();
       const update: Partial<ConfigData> = {
         zapIp: config.zapIp, 
-        misterEnabled: config.misterEnabled,
+        zapEnabled: config.zapEnabled,
         steamIp: config.steamIp,
         steamEnabled: config.steamEnabled,
         resetOnRemove: config.resetOnRemove
@@ -23,17 +23,17 @@
     <div class="input-group">
       <div class="input-group-text">
         <div class="form-check form-switch col-2">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableMister" bind:checked={config.misterEnabled}/>
-          <label class="form-check-label visually-hidden" for="enableMister">Enable Mister</label>
+          <input class="form-check-input" type="checkbox" role="switch" id="enableZaparoo" bind:checked={config.zapEnabled}/>
+          <label class="form-check-label visually-hidden" for="enableZaparoo">Enable Zaparoo</label>
         </div>
       </div>
       <div class="form-floating">
-        <input type="text" class="form-control col-6" id="misterIp" placeholder="mister.local" bind:value={config.zapIp} disabled={!config.misterEnabled} />
-        <label for="misterIp">Mister Address</label>
+        <input type="text" class="form-control col-6" id="zaparooIp" placeholder="mister.local" bind:value={config.zapIp} disabled={!config.zapEnabled} />
+        <label for="zaparooIp">Zaparoo Address</label>
       </div>
       <div class="input-group-text">
         <div class="form-check form-switch col-4">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableRRoR" bind:checked={config.resetOnRemove} disabled={!config.misterEnabled}/>
+          <input class="form-check-input" type="checkbox" role="switch" id="enableRRoR" bind:checked={config.resetOnRemove} disabled={!config.zapEnabled}/>
           <label class="form-check-label" for="enableRRoR">Reset On Remove</label>
         </div>
       </div>

@@ -35,7 +35,7 @@ export interface ConfigData {
   wifiLedPin: number;
   launchLedPin: number;
   pwrLedPin: number;
-  misterEnabled: boolean;
+  zapEnabled: boolean;
   steamEnabled: boolean;
   sdCardEnabled: boolean;
   steamIp: string;
