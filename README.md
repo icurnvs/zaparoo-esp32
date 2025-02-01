@@ -13,7 +13,8 @@ The goal of this project is to launch games via the [Zaparoo Service](https://wi
   - upload audio files to SD Card (if enabled), or ESP32 SPIFFS partition.
   - Search for games & write NFC tag/Cards with extended information.
   - Set default detect, launch, error, and remove events audio files
-  - Configure unique launch audio and card removal audio sounds per game/card.
+  - Configure unique launch audio and card removal audio sounds per game/card.  
+  - Create Zaparoo Mapping DB entries to launch games from read-only NFC Tags/Amiibo's.  
   - Set launch & remove event audio clip files for readonly RFID/NFC tags (eg amiibo)
 
 
