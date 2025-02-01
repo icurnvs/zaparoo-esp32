@@ -1,14 +1,18 @@
 <script lang="ts">
-  import type { zapSystems, zapSearchResults, htmlFormattedSearchRes, writeResultState, sourceZapSvsList, ConfigData } from '../types/ConfigData';
+  import type { zapSystems, zapSearchResults, htmlFormattedSearchRes, writeResultState, sourceZapSvsList, ConfigData, UIDExtdRecord } from '../types/ConfigData';
   import { ZapUtils } from '../backend/ZapUtils';
   import { CommonUtils } from '../backend/CommonUtils';
   import { EspUtils } from "../backend/EspUtils";
+  import { UIDUtils } from '../backend/UIDUtils';
   let zapSysList: zapSystems = ZapUtils.getBlankSystems();
   let zapSvsList: sourceZapSvsList = ZapUtils.getActiveSourceList();
   let zapSrchRes: zapSearchResults = ZapUtils.getBlankSearchResults();
   let htmlSerRes: htmlFormattedSearchRes = ZapUtils.getBlankhmtlSrchRes();
   let selectedSource: string = "";
   let dialogWait: HTMLDialogElement;
+  let uidRecord: UIDExtdRecord = UIDUtils.getBlank();
+  let lastUIDVal : string = "";
+  UIDUtils.UIDRecord().subscribe(value=> tempUID(value));
   ZapUtils.zapSrcRes().subscribe(value=> zapSrchRes = value);
   ZapUtils.indexedSystemsList().subscribe(value=> zapSysList = value);
   ZapUtils.htmlSrchRes().subscribe(value=> htmlSerRes = value);
@@ -23,7 +27,12 @@
   let dialogSuccess: HTMLDialogElement;
   let dialogFailure: HTMLDialogElement;
   let dialogNoCard: HTMLDialogElement;
-    
+  let dialogScriptStart: HTMLDialogElement;
+  let mapTxtHelp: string = "Create a map between a readonly RFID Tag/Amiibo & the selected game Launch Path. Mapping Record is stored in Zaparoo.";
+  let writeTxtHelp: string = "Write the Game Launch & Audio File Paths to NFC Card/Tag";
+  let testLaunchTxtHelp: string = "Test Launch the selected Game"
+  
+     
   function WrStIsChanged(currVal: writeResultState) {
       switch(currVal.state){
         case 1:
@@ -39,6 +48,12 @@
           diagNoCardOpen();
           break;
       }
+  }
+
+  function tempUID(currUIDrec: UIDExtdRecord){
+    if(lastUIDVal != currUIDrec.UID){
+      lastUIDVal = currUIDrec.UID;
+    }
   }
 
   function settingsIsChanged(currSet: ConfigData){
@@ -73,6 +88,12 @@
     diagWriteClose();
     diagWaitOpen();
   };
+
+  function diagScriptStart(){
+    UIDUtils.setUIDMode(true);
+    lastUIDVal = "";
+    dialogScriptStart.showModal();
+  }
 
   function diagWriteClose() {
     dialogWrite.close("true");
@@ -130,6 +151,20 @@
   function doDBIndex() {
     ZapUtils.updateGamesDB();
   }
+
+  function diagWriteMapOK() {
+    if(audLaunchP){audLaunchP = CommonUtils.validateAudioPath(audLaunchP)};
+    if(audRemoveP){audRemoveP = CommonUtils.validateAudioPath(audRemoveP)};
+    ZapUtils.doWriteZapScript(lastUIDVal, selectedGame, audLaunchP, audRemoveP);
+    dialogScriptStart.close("true");
+    UIDUtils.setUIDMode(false);
+  }
+
+  function diagWriteMapCancel() {
+    dialogScriptStart.close("true");
+    UIDUtils.setUIDMode(false);
+    //uidRecord = UIDUtils.getBlank();
+   }
     
 </script>
 <div class="text-center mb-3">
@@ -212,8 +247,9 @@
     <div class="container">
       <div class="row">
         <div class="col text-center">  
-          <button type="button" class="btn btn-primary mt-4" on:click="{diagWriteOpen}">Write To Card</button>        
-          <button type="button" class="btn btn-primary mt-4" on:click="{doTestLaunch}">Test Launch</button>
+          <button type="button" class="btn btn-primary mt-4" on:click="{diagWriteOpen}" data-bs-toggle="tooltip" title="{writeTxtHelp}" data-bs-placement="top">Write To Card</button>
+          <button type="button" class="btn btn-primary mt-4" on:click="{diagScriptStart}" data-bs-toggle="tooltip" title="{mapTxtHelp}" data-bs-placement="top">Create Zaparoo Mapping</button>        
+          <button type="button" class="btn btn-primary mt-4" on:click="{doTestLaunch}" data-bs-toggle="tooltip" title="{testLaunchTxtHelp}" data-bs-placement="top">Test Launch</button>
         </div>
       </div>
     </div>
@@ -277,5 +313,17 @@
 <dialog bind:this={dialogWait}>
   <div class="text-center mb-3">
     <h4>Writing Data To Card - Please Wait</h4>
+  </div>
+</dialog>
+<dialog bind:this={dialogScriptStart}>
+  <div class="text-center mb-3">
+    <h4>Scan Read Only NFC Tag/Amiibo</h4>
+    {#if lastUIDVal != ""}
+    <h4>Tag UID: {lastUIDVal}</h4>
+    <h4>Click OK to Set Mapping to Current Game & Save Audio File Paths</h4>
+    <h4>Clicking OK will overwrite any existing Mapping & Paths!</h4>
+    <button type="button" class="btn btn-primary mt-4" on:click="{diagWriteMapOK}">OK</button>
+    {/if}
+    <button type="button" class="btn btn-primary mt-4" on:click="{diagWriteMapCancel}">Cancel</button>
   </div>
 </dialog>

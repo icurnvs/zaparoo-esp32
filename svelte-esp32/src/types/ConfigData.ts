@@ -119,3 +119,18 @@ export interface sourceZapSvs {
   name: string,
   value: string
 }
+
+export interface mapping {
+  added?: string;
+  enabled?: boolean;
+  id?: number;
+  label?: string;
+  match?:  string;
+  override?:  string;
+  pattern:  string;
+  type?:  string;
+}
+
+export interface mappings {
+  mappings: Array<mapping>;
+}
