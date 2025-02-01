@@ -144,6 +144,8 @@ void startApMode() {
 }
 
 void connectWifi() {
+  int i_strongest = -1;
+  int32_t rssi_strongest = -100;
   if (WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_MODE_AP) {
     return;
   }
@@ -154,8 +156,22 @@ void connectWifi() {
     startApMode();
     return;
   }
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, preferences.getString("wifiPass", ""));
+  //Code to connect esp32 to strongest AP in mesh network env
+  int n = WiFi.scanNetworks();
+  if (n != 0) {
+    for (int i = 0; i < n; ++i) {
+      if ((ssid == String(WiFi.SSID(i)) && (WiFi.RSSI(i)) > rssi_strongest)) {
+        rssi_strongest = WiFi.RSSI(i);
+        i_strongest = i;
+      }
+    }
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, preferences.getString("wifiPass", ""), 0, WiFi.BSSID(i_strongest));
+  } else {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, preferences.getString("wifiPass", ""));
+  }
+  
   int retries = 30;
   while (WiFi.status() != WL_CONNECTED && retries--) {
     feedback.wifiLedOn();
