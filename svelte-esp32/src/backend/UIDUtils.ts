@@ -30,14 +30,14 @@ export class UIDUtils{
     }
 
     static processUIDExtData(UIDData: UIDExtdRecsMessage){
-        console.log("UIDData:", UIDData)
+        //console.log("UIDData:", UIDData)
         let currData: UIDExtdRecords = UIDData.data;
         this.currentUIDData = currData;
-        console.log("currentUIDData:", this.currentUIDData);
+        //console.log("currentUIDData:", this.currentUIDData);
     }
 
     static processPushedUID(PushedUIDRecord: PushedUIDTokenMessage){
-        console.log("PushedUIDRecord:", PushedUIDRecord)
+        //console.log("PushedUIDRecord:", PushedUIDRecord)
         let curRec = this.currentUIDData.UID_ExtdRecs.filter((item: {UID: string}) => (item.UID == PushedUIDRecord.data));
         if(curRec.length !== 0){
             this.currentUIDRecord.set(curRec[0]);

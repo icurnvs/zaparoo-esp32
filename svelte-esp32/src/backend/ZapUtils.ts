@@ -1,8 +1,10 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, EspMessage, writeResultState, sourceZapSvs, sourceZapSvsList, indexingMessage } from "../types/ConfigData";
+import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, EspMessage, writeResultState, sourceZapSvs, sourceZapSvsList, indexingMessage, mappings, mapping } from "../types/ConfigData";
 import {v4 as uuidv4} from 'uuid';
 import { EspUtils, } from "./EspUtils";
 import { LogUtils } from "./LogUtils";
+import { UIDUtils } from "../backend/UIDUtils";
+import type { UIDExtdRecord } from "../types/ConfigData";
 export class ZapUtils{
     private static retSystems: Writable<zapSystems> = writable({} as zapSystems);
     private static srchResults: Writable<zapSearchResults> = writable({} as zapSearchResults);
@@ -13,6 +15,9 @@ export class ZapUtils{
     private static isCreateModeEnabled = false;
     private static writeResultState: Writable<writeResultState> = writable({} as writeResultState);
     private static currZapSvs: string = "";
+    private static currMappings: mappings;
+    
+    
     
     private static buildZapSocketURL(ip: string, path: string): string{
         return `ws://${ip}:7497${path}`;
@@ -52,6 +57,13 @@ export class ZapUtils{
 
     static getBlankIndexingMsg(): indexingMessage{
         return {} as indexingMessage;
+    }
+
+    static getBlankMappings(): mappings{
+        return {} as mappings;
+    }
+    static getBlankMapping(): mapping{
+        return {} as mapping;
     }
 
     static getActiveSourceList(): sourceZapSvsList{
@@ -111,6 +123,7 @@ export class ZapUtils{
         LogUtils.notify(`Connected to Zaparoo on ${this.currZapSvs}`);
         this.bZapSvsConnected = true;
         this.generateIndexedSystemsList();
+        setTimeout(()=> this.generateMappingsList(), 1000);        
     }
 
     private static connOnClose(){
@@ -133,6 +146,11 @@ export class ZapUtils{
                 let tmpSearchRes: zapSearchResults = msgData.result;
                 this.processSearchResults(tmpSearchRes);
             }
+            //return of mappings list
+            if(typeof(msgData.result.mappings) != "undefined"){
+                let tmpMapRes: mappings = msgData.result;
+                this.processMappings(tmpMapRes);
+            }
         }else if(typeof(msgData.method) != "undefined"){
             //DB Indexing Status
             if((msgData.method) == "media.indexing"){
@@ -150,7 +168,11 @@ export class ZapUtils{
     private static connOnError(){
         LogUtils.notify("Unable to connect to Zaparoo: Check IP/service is running & reload window");
         this.bZapSvsConnected = false;
-    }    
+    }  
+    
+    private static processMappings(retMapList: mappings){
+        this.currMappings = retMapList;
+    }
 
     private static processSearchResults(recSearchRes: zapSearchResults){
         if(recSearchRes.total > 250){
@@ -218,6 +240,10 @@ export class ZapUtils{
         return this.writeResultState;
     }
 
+    static mapList(): mappings{
+        return this.currMappings;
+    }
+
     static generateIndexedSystemsList(){        
         if(this.bZapSvsConnected){
             let newUUID = uuidv4();
@@ -230,6 +256,19 @@ export class ZapUtils{
             this.zapSvsSocket.send(JSON.stringify(wscmd));
         }   
     }  
+
+    static generateMappingsList(){        
+        if(this.bZapSvsConnected){
+            let newUUID = uuidv4();
+            let wscmd = {
+                jsonrpc: "2.0",
+                id: newUUID,
+                method: "mappings"
+            };
+            //console.log("Sending Cmd to Zap Svs:", wscmd);
+            this.zapSvsSocket.send(JSON.stringify(wscmd));
+        }   
+    }
 
     static updateGamesDB(){
         //console.log("UpdatingDB");
@@ -285,7 +324,7 @@ export class ZapUtils{
             audioLaunchPath: aLaunchP,
             audioRemovePath: aRemoveP
         }
-        console.log("write cmd: ", newCMD);
+        //console.log("write cmd: ", newCMD);
         EspUtils.sendMessage(newCMD);
     }
 
@@ -312,6 +351,51 @@ export class ZapUtils{
         this.writeResultState.set(tmpWRS);        
     }
 
-
+    static doWriteZapScript(currUID: string, launchPath: string, aLaunchP: string | null, aRemoveP: string | null){
+        let newUUID = uuidv4();
+        if(!aLaunchP){aLaunchP = ""};
+        if(!aRemoveP){aRemoveP = ""};
+        let mapID:number|undefined =  0;
+        let wscmd = {};
+        let tmpMapping:mapping = this.getBlankMapping();                
+        let curMapRec = this.currMappings.mappings.filter((item: {pattern: string}) => (item.pattern == currUID));
+        if(curMapRec.length !== 0){
+            mapID = curMapRec[0].id;
+        }        
+        if (mapID != 0){
+            tmpMapping.id = Number(mapID),
+            tmpMapping.enabled = true,
+            tmpMapping.match = "exact",
+            tmpMapping.override = launchPath,
+            tmpMapping.pattern = currUID,
+            tmpMapping.type = "uid"
+            wscmd = {
+                jsonrpc: "2.0",
+                id: newUUID,
+                method: "mappings.update",
+                params: tmpMapping
+            };
+        }else {
+            tmpMapping.enabled = true,
+            tmpMapping.match = "exact",
+            tmpMapping.override = launchPath,
+            tmpMapping.pattern = currUID,
+            tmpMapping.type = "uid"
+            wscmd = {
+                jsonrpc: "2.0",
+                id: newUUID,
+                method: "mappings.new",
+                params: tmpMapping
+            };
+        }
+        //console.log("wscmd: ", wscmd)
+        this.zapSvsSocket.send(JSON.stringify(wscmd));
+        let tmpUIDRec = UIDUtils.getBlank();
+        tmpUIDRec.UID = currUID;
+        tmpUIDRec.launchAudio = aLaunchP;
+        tmpUIDRec.removeAudio = aRemoveP;
+        UIDUtils.updateUIDRecord(tmpUIDRec);
+        UIDUtils.setUIDMode(false);        
+    }
 
 }

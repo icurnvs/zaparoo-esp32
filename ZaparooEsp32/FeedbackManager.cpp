@@ -42,8 +42,9 @@ void FeedbackManager::init(Preferences* prefs) {
     i2sBclkPin = preferences->getInt("i2sBclkPin", 27);
     i2sLrcPin = preferences->getInt("i2sLrcPin", 26);
     i2sDoutPin = preferences->getInt("i2sDoutPin", 25);
-    createUidMappingFile();
     setupPins();
+    delay(500);
+    createUidMappingFile();
 
 }
 

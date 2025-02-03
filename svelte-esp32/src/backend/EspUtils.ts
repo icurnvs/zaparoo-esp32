@@ -75,11 +75,11 @@ export class EspUtils{
                 UIDUtils.processPushedUID(msgData);
                 break;
             case "writeResults":
-                console.log("wr: ", msgData.data)    
+                //console.log("wr: ", msgData.data)    
                 ZapUtils.handleWriteResults(msgData.data.isSuccess, msgData.data.isCardDetected);
                 break;
             case "closeWS":
-                console.log("wr: ", msgData)    
+                //console.log("wr: ", msgData)    
                 this.websocket.onclose = null;
                 this.websocket.close();
                 setTimeout(()=> this.initWebSocket(), 2000);
@@ -103,7 +103,7 @@ export class EspUtils{
 
     static updateConfig(update: Partial<ConfigData>){
         if(this.updating) return true;
-        console.log(update);
+        //console.log(update);
         this.updating = true;
         this.currentConfig.subscribe((conf=>{
             const data = Object.assign({...conf}, update);
