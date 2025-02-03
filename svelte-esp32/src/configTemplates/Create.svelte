@@ -169,8 +169,7 @@
     
 </script>
 <div class="text-center mb-3">
-  <h2>Create TAG mode</h2>
-  <h3>Select Source & Search for a title</h3>
+  <h2>Create Tag</h2>
 </div>
 <form on:submit={handleSubmit} class="row g-3">
   <div class="col-12">

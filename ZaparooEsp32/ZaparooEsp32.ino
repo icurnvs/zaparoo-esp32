@@ -421,7 +421,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
 
 void handleSend(){
   bool sent = false;
-  bool playAudioFirst = serialOnly && feedback.resetOnRemove && uidScanMode;
+  bool playAudioFirst = serialOnly && feedback.resetOnRemove && !uidScanMode;
   feedback.setUidAudioMappings(token);
   if(playAudioFirst){
     feedback.successActions(token); //Play the audio before launch to support remove with simple serial
@@ -476,7 +476,7 @@ bool readScanner() {
       inserted = false;
       tokenScanner->halt();
       return true;
-    }else if (present && inserted && serialOnly && feedback.resetOnRemove){
+    }else if (present && inserted && serialOnly && feedback.resetOnRemove && !uidScanMode){
       Serial.println(lastSerialCommand);
       Serial.flush();
     }
