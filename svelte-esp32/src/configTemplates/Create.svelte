@@ -57,16 +57,17 @@
   }
 
   function settingsIsChanged(currSet: ConfigData){
+    zapSvsList = ZapUtils.getActiveSourceList();
     //monitors for changes to settings and reloads SourceList
-    if(currSet.steamIp != "" || currSet.zapIp != ""){
+    /*if(currSet.steamIp != "" || currSet.zapIp != ""){
       zapSvsList = ZapUtils.getActiveSourceList();
     }
-    if(currSet.steamEnabled || currSet.misterEnabled){
+    if(currSet.steamEnabled || currSet.zapEnabled){
       zapSvsList = ZapUtils.getActiveSourceList();
     }
-    if(!currSet.steamEnabled || !currSet.misterEnabled){
+    if(!currSet.steamEnabled || !currSet.zapEnabled){
       zapSvsList = ZapUtils.getActiveSourceList();
-    }    
+    }  */  
   }
 
   function getSystems(){
@@ -168,8 +169,7 @@
     
 </script>
 <div class="text-center mb-3">
-  <h2>Create TAG mode</h2>
-  <h3>Select Source & Search for a title</h3>
+  <h2>Create Tag</h2>
 </div>
 <form on:submit={handleSubmit} class="row g-3">
   <div class="col-12">
@@ -206,7 +206,24 @@
       </div>
     </div>
     {/if}
-    {#if !zapSysList.systems && selectedSource != ""}
+    {#if selectedSource === "manual"}
+    <div class="input-group mt-3">
+      <div class="col-12">
+        <label for="manualText">Text</label><input class="form-control" id="manualText" type="text" bind:value={selectedGame}/>
+      </div>
+    </div>
+      <div class="input-group mt-3">
+        <div class="col-6">
+          <label for="searchQry">Launch Audio Path</label>
+          <input type="text" class="form-control" id="aLauchP" bind:value={audLaunchP}/>
+        </div>
+        <div class="col-6">
+          <label for="searchQry">Remove Audio Path</label>
+          <input type="text" class="form-control" id="aRemoveP" bind:value={audRemoveP}/>
+        </div>
+      </div>
+    {/if}
+    {#if !zapSysList.systems && selectedSource === "zaparoo"}
     <div class="text-center mt-5">
       <h3>Unable to connect to Zaparoo service. Check the service is running and IP address is correct.</h3>
     </div>
@@ -239,6 +256,11 @@
           <div class="col-6">
             <label for="searchQry">Remove Audio Path</label>
             <input type="text" class="form-control" id="aRemoveP" bind:value={audRemoveP}/>
+          </div>
+        </div>
+        <div class="input-group mt-3">
+          <div class="col-12">
+            <label for="cardText">Text</label><input disabled class="form-control" id="cardText" type="text" bind:value={selectedGame}/>
           </div>
         </div>
       {/if}

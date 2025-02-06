@@ -82,12 +82,16 @@ export class ZapUtils{
             newZapSvs.value = "steam";
             newZapSvsList.sources.push(newZapSvs);
         }
-        if(this.currConfig.misterEnabled){
+        if(this.currConfig.zapEnabled){
             newZapSvs = this.getBlankSourceZapSvs();
             newZapSvs.name = "Zaparoo";
             newZapSvs.value = "zaparoo";
             newZapSvsList.sources.push(newZapSvs);
         }
+        newZapSvs = this.getBlankSourceZapSvs();
+        newZapSvs.name = "Manual";
+        newZapSvs.value = "manual";
+        newZapSvsList.sources.push(newZapSvs);
         return newZapSvsList;
     }
 

@@ -51,7 +51,7 @@ int timeoutLoop = 0;
 bool isConnected = false;
 bool isWebLog = false;
 bool softReset = false;
-bool misterEnabled = true;
+bool zapEnabled = true;
 bool steamEnabled = false;
 bool uidScanMode= false;
 bool serialOnly = false;
@@ -242,8 +242,8 @@ bool send(String& gamePath) {
     lastSerialCommand = "SCAN\ttext=" + gamePath;
     if(!feedback.resetOnRemove){
       lastSerialCommand = lastSerialCommand + "\tremovable=no";
+      Serial.println(lastSerialCommand);
     }
-    Serial.println(lastSerialCommand);
     Serial.flush();
     message = "Sent game path to serial: " + gamePath;
     sent = true;
@@ -280,7 +280,7 @@ bool sendUid(String& uid) {
   } else {
     //not possible to determine if steam game from UID so always default to MiSTer if enabled
     String newURL = ZAP_URL;
-    newURL.replace("<replace>", misterEnabled ? zapIp : steamIp);
+    newURL.replace("<replace>", zapEnabled ? zapIp : steamIp);
     ZapClient.url(newURL);
     int code = ZapClient.launchUid(uid);
     if (code > 0) {
@@ -309,7 +309,7 @@ void getWebConfigData() {
   feedback.set(configData);
   configData["msgType"] = "ConfigData";
   configData["data"]["zapIp"] = preferences.getString("zapIp", "mister.local");
-  configData["data"]["misterEnabled"] = preferences.getBool("misterEnabled", true);
+  configData["data"]["zapEnabled"] = preferences.getBool("zapEnabled", true);
   configData["data"]["steamEnabled"] = preferences.getBool("steamEnabled", false);
   configData["data"]["serialOnly"] = preferences.getBool("serialOnly", false);
   configData["data"]["steamIp"] = preferences.getString("steamIp", "steamOS.local");
@@ -328,8 +328,8 @@ void setWebConfigData(JsonDocument& cfgData) {
   if(cfgData["data"].containsKey("steamEnabled")){
     setPref_Bool("steamEnabled", cfgData["data"]["steamEnabled"]);
   }
-  if(cfgData["data"].containsKey("misterEnabled")){
-    setPref_Bool("misterEnabled", cfgData["data"]["misterEnabled"]);
+  if(cfgData["data"].containsKey("zapEnabled")){
+    setPref_Bool("zapEnabled", cfgData["data"]["zapEnabled"]);
   }
   if(cfgData["data"].containsKey("serialOnly")){
     setPref_Bool("serialOnly", cfgData["data"]["serialOnly"]);
@@ -421,7 +421,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
 
 void handleSend(){
   bool sent = false;
-  bool playAudioFirst = serialOnly && feedback.resetOnRemove && uidScanMode;
+  bool playAudioFirst = serialOnly && feedback.resetOnRemove && !uidScanMode;
   feedback.setUidAudioMappings(token);
   if(playAudioFirst){
     feedback.successActions(token); //Play the audio before launch to support remove with simple serial
@@ -476,7 +476,7 @@ bool readScanner() {
       inserted = false;
       tokenScanner->halt();
       return true;
-    }else if (present && inserted && serialOnly && feedback.resetOnRemove){
+    }else if (present && inserted && serialOnly && feedback.resetOnRemove && !uidScanMode){
       Serial.println(lastSerialCommand);
       Serial.flush();
     }
@@ -514,7 +514,7 @@ void setup() {
   
   //set globals to reduce the number of call to preference library (performance)
   zapIp = preferences.getString("zapIp", "mister.local");
-  misterEnabled = preferences.getBool("misterEnabled", true);
+  zapEnabled = preferences.getBool("zapEnabled", true);
   steamEnabled = preferences.getBool("steamEnabled", false);
   steamIp = preferences.getString("steamIp", "steamOS.local");
   serialOnly = preferences.getBool("serialOnly", false);
