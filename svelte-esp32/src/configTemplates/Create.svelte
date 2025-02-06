@@ -258,11 +258,6 @@
             <input type="text" class="form-control" id="aRemoveP" bind:value={audRemoveP}/>
           </div>
         </div>
-        <div class="input-group mt-3">
-          <div class="col-12">
-            <label for="cardText">Text</label><input disabled class="form-control" id="cardText" type="text" bind:value={selectedGame}/>
-          </div>
-        </div>
       {/if}
     {/if}
     {#if selectedGame.length > 0}
