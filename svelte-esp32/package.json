@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "setup": "node ./setup.js",
     "build": "vite build",
     "buildWin": "vite build && powershell -ExecutionPolicy Bypass -File ./compressAndDeploy.ps1",
     "preview": "vite preview",
