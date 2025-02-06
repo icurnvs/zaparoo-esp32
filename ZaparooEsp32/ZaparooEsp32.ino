@@ -4,7 +4,6 @@
 #include <ESPAsyncWebServer.h>
 #include <Preferences.h>
 #include <ArduinoJson.h>
-#include <ArduinoWebsockets.h>
 #include <SPI.h>
 #include <AudioFileSourceLittleFS.h>
 #include "AudioFileSourceSD.h"
@@ -33,11 +32,10 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 //Common Setup
 AudioOutputI2S* out;
-Preferences preferences;
-using namespace websockets;
-AsyncWebServer server(80);
-AsyncWebSocket ws("/ws");
 ESPWebFileManager fileManager;
+Preferences preferences;
+AsyncWebServer server(80);
+AsyncWebSocket ws1("/ws");
 ZaparooLaunchApi ZapClient;
 ZaparooScanner* tokenScanner = NULL;
 FeedbackManager feedback;
@@ -90,7 +88,7 @@ void notifyClients(const String& txtMsgToSend, const String& msgType) {
     String output;
     serializeJson(msgJson, output);
     delay(200);
-    ws.textAll(output.c_str());
+    ws1.textAll(output.c_str());
   }
 }
 
@@ -100,7 +98,7 @@ void cmdClients(JsonDocument& cmdJson) {
   Serial.print("WS MSG SENT: ");
   Serial.println(output);
   delay(100);
-  ws.textAll(output.c_str());
+  ws1.textAll(output.c_str());
 }
 
 void onEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type,
@@ -125,8 +123,8 @@ void onEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType 
 }
 
 void initWebSocket() {
-  ws.onEvent(onEvent);
-  server.addHandler(&ws);
+  ws1.onEvent(onEvent);
+  server.addHandler(&ws1);
 }
 
 void startApMode() {
@@ -347,8 +345,8 @@ void handleResetRequest(){
   cmdData["msgType"] = "closeWS";
   cmdClients(cmdData);
   delay(1000);
-  ws.closeAll();
-  ws.cleanupClients();
+  ws1.closeAll();
+  ws1.cleanupClients();
   ESP.restart();
 }
 
@@ -386,8 +384,8 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
       send(data);
   } else if (command == "closeWS") {
       setPref_Bool("enNfcWr", false);
-      ws.closeAll();
-      ws.cleanupClients();
+      ws1.closeAll();
+      ws1.cleanupClients();
   } else if (command == "getUIDExtdRec") {
       notifyClients("Retrieving UIDExtdRec Data", "log");
       getUIDExtdRec();
@@ -519,6 +517,12 @@ void setup() {
   steamIp = preferences.getString("steamIp", "steamOS.local");
   serialOnly = preferences.getBool("serialOnly", false);
 
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html, index_html_len);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+  });
+
   if (feedback.sdCardEnabled) {
     Serial.println("SD CARD MODE");
     fileManager.initFileSystem(ESPWebFileManager::FS_SD_CARD, true);
@@ -529,11 +533,7 @@ void setup() {
     fileManager.setServer(&server);
   }
 
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html, index_html_len);
-    response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
+  
 }
 
 void loop() {

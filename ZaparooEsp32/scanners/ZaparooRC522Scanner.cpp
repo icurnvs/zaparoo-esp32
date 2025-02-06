@@ -99,9 +99,13 @@ public:
             message.addTextRecord(launchCmd.c_str());
             if(audioLaunchFile.length() > 0){
               message.addTextRecord(audioLaunchFile.c_str());
+            } else {
+              message.addTextRecord("");
             }
             if(audioRemoveFile.length() > 0){
               message.addTextRecord(audioRemoveFile.c_str());
+            } else {
+              message.addTextRecord("");
             }
             bool success = nfc->write(message);
             if(!success){
