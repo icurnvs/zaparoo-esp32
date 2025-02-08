@@ -32,7 +32,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 //Common Setup
 AudioOutputI2S* out;
-ESPWebFileManager fileManager;
+ESPWebFileManager* fileManager;
 Preferences preferences;
 AsyncWebServer server(80);
 AsyncWebSocket ws1("/ws");
@@ -401,7 +401,6 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
       notifyClients("Saving UIDExtdRec Data", "log");
       JsonDocument data = root["data"];
       feedback.saveUidMapping(data);
-      //saveUIDExtdRec(root["data"]);
   } else if (command == "wifi") {
     setPref_Str("wifiSSID", root["data"]["ssid"].as<String>());
     setPref_Str("wifiPass", root["data"]["password"].as<String>());
@@ -525,15 +524,13 @@ void setup() {
 
   if (feedback.sdCardEnabled) {
     Serial.println("SD CARD MODE");
-    fileManager.initFileSystem(ESPWebFileManager::FS_SD_CARD, true);
-    fileManager.setServer(&server);
+    fileManager = new ESPWebFileManager(FS_SD, true);
   } else {
     Serial.println("LITTLEFS MODE");
-    fileManager.initFileSystem(ESPWebFileManager::FS_LITTLEFS, true);
-    fileManager.setServer(&server);
+    fileManager = new ESPWebFileManager(FS_LITTLEFS, true);
   }
-
-  
+  fileManager->setServer(&server);
+  fileManager->begin();
 }
 
 void loop() {
