@@ -18,4 +18,4 @@ The goal of this project is to launch games via the [Zaparoo Service](https://wi
   - Set launch & remove event audio clip files for readonly RFID/NFC tags (eg amiibo)
 
 
- Please refer to the [wiki](https://github.com/MintyTrebor/zaparoo-esp32/wiki) for full info and build details
+ Please refer to the [wiki](https://github.com/ZaparooProject/zaparoo-esp32/wiki) for full info and build details
