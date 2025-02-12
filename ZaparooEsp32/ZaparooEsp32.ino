@@ -531,6 +531,7 @@ void setup() {
   }
   fileManager->setServer(&server);
   fileManager->begin();
+  feedback.createUidMappingFile();
 }
 
 void loop() {
