@@ -18,7 +18,9 @@ export class UIDUtils{
         console.log(`Setting UID Editing Mode : ${this.isUIDModeEnabled}`);
         newCMD.cmd = "set_UIDMode";
         newCMD.data = this.isUIDModeEnabled;
-        EspUtils.sendMessage(newCMD);
+        if(!EspUtils.sendMessage(newCMD)){
+            setTimeout(()=> this.setUIDMode(value), 2000);
+        }
     }
     
     static getBlank(): UIDExtdRecord{
@@ -30,14 +32,11 @@ export class UIDUtils{
     }
 
     static processUIDExtData(UIDData: UIDExtdRecsMessage){
-        //console.log("UIDData:", UIDData)
         let currData: UIDExtdRecords = UIDData.data;
         this.currentUIDData = currData;
-        //console.log("currentUIDData:", this.currentUIDData);
     }
 
     static processPushedUID(PushedUIDRecord: PushedUIDTokenMessage){
-        //console.log("PushedUIDRecord:", PushedUIDRecord)
         let curRec = this.currentUIDData.UID_ExtdRecs.filter((item: {UID: string}) => (item.UID == PushedUIDRecord.data));
         if(curRec.length !== 0){
             this.currentUIDRecord.set(curRec[0]);

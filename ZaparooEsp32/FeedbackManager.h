@@ -13,7 +13,6 @@ class FeedbackManager {
 private:
     Preferences* preferences;
     void setupPins();
-    void createUidMappingFile();
 public:
     float audioGain = 1.0;
     bool wifiLedEnabled = false;
@@ -62,4 +61,5 @@ public:
     int playAudio(const char* audioPath);
     void cardInsertedActions(ZaparooToken* obj);
     void cardRemovedActions(ZaparooToken* obj);
+    void createUidMappingFile();
 };

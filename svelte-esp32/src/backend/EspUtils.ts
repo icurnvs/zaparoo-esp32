@@ -121,7 +121,12 @@ export class EspUtils{
     }
 
     static sendMessage(newMsg: EspMessage){
-        this.websocket.send(JSON.stringify(newMsg));
+        try{
+            this.websocket.send(JSON.stringify(newMsg));
+            return true;
+        }catch(e){
+            return false;
+        }
     }
 
     static updateWifi(ssid: string, password: string){
